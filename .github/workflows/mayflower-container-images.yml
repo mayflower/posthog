@@ -8,7 +8,7 @@ on:
 
 concurrency:
     group: mayflower-container-images-${{ github.ref }}
-    cancel-in-progress: false
+    cancel-in-progress: true
 
 env:
     REGISTRY: ghcr.io
@@ -31,9 +31,6 @@ jobs:
               with:
                   fetch-depth: 2
 
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
-
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
@@ -49,7 +46,7 @@ jobs:
               with:
                   context: .
                   push: true
-                  platforms: linux/amd64,linux/arm64
+                  platforms: linux/amd64
                   tags: |
                       ${{ env.APP_IMAGE }}:master
                       ${{ env.APP_IMAGE }}:${{ github.sha }}
@@ -77,9 +74,6 @@ jobs:
               with:
                   fetch-depth: 2
 
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
-
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
@@ -96,7 +90,7 @@ jobs:
                   context: .
                   file: Dockerfile.node
                   push: true
-                  platforms: linux/amd64,linux/arm64
+                  platforms: linux/amd64
                   tags: |
                       ${{ env.NODE_IMAGE }}:master
                       ${{ env.NODE_IMAGE }}:${{ github.sha }}
