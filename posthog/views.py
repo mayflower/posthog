@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_http_methods
 
 import structlog
+from kafka import KafkaAdminClient
 from opentelemetry import trace
 
 from posthog.auth import AUTH_BRAND_COOKIE, apply_auth_brand_cookie, normalize_auth_brand
@@ -77,6 +78,35 @@ try:
     from ee.models.license import get_licensed_users_available
 except ImportError:
     get_licensed_users_available = noop  # ty: ignore[invalid-assignment]
+
+
+def is_kafka_alive() -> bool:
+    kafka_profile = settings.KAFKA_PROFILES["default"]
+    admin_client = None
+    admin_client_config = {
+        "bootstrap_servers": kafka_profile.hosts,
+        "security_protocol": kafka_profile.security_protocol or "PLAINTEXT",
+        "request_timeout_ms": 2000,
+        "api_version_auto_timeout_ms": 2000,
+    }
+
+    if kafka_profile.sasl_mechanism:
+        admin_client_config["sasl_mechanism"] = kafka_profile.sasl_mechanism
+    if kafka_profile.sasl_user:
+        admin_client_config["sasl_plain_username"] = kafka_profile.sasl_user
+    if kafka_profile.sasl_password:
+        admin_client_config["sasl_plain_password"] = kafka_profile.sasl_password
+
+    try:
+        admin_client = KafkaAdminClient(**admin_client_config)
+        admin_client.list_topics()
+        return True
+    except Exception:
+        logger.warning("preflight_kafka_connection_failure", exc_info=True)
+        return False
+    finally:
+        if admin_client is not None:
+            admin_client.close()
 
 
 def login_required(view):
@@ -196,7 +226,7 @@ def preflight_check(request: HttpRequest) -> JsonResponse:
         "clickhouse": in_cloud
         or _traced("preflight.is_clickhouse_connected", is_clickhouse_connected)
         or settings.TEST,
-        "kafka": in_cloud or settings.TEST,
+        "kafka": in_cloud or settings.TEST or _traced("preflight.is_kafka_alive", is_kafka_alive),
         "db": in_cloud or _traced("preflight.is_postgres_alive", is_postgres_alive),
         "initiated": in_cloud or _traced("preflight.organization_exists", Organization.objects.exists),
         "cloud": in_cloud,

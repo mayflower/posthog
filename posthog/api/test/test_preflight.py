@@ -14,6 +14,7 @@ from posthog.cloud_utils import TEST_clear_instance_license_cache
 from posthog.models.instance_setting import set_instance_setting
 from posthog.models.organization import Organization
 from posthog.models.organization_invite import OrganizationInvite
+from posthog.views import is_kafka_alive
 
 
 class TestPreflight(APIBaseTest, QueryMatchingTest):
@@ -258,6 +259,18 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == self.preflight_dict({"demo": True, "can_create_org": True, "realm": "demo"})
+
+    @patch("posthog.views.KafkaAdminClient")
+    def test_is_kafka_alive(self, patched_admin_client):
+        assert is_kafka_alive() is True
+        patched_admin_client.return_value.list_topics.assert_called_once()
+        patched_admin_client.return_value.close.assert_called_once()
+
+    @patch("posthog.views.KafkaAdminClient")
+    def test_is_kafka_alive_returns_false_on_connection_failure(self, patched_admin_client):
+        patched_admin_client.side_effect = Exception("Kafka unavailable")
+
+        assert is_kafka_alive() is False
 
     @pytest.mark.ee
     @pytest.mark.skip_on_multitenancy
