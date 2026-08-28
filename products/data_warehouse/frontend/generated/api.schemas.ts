@@ -2437,6 +2437,7 @@ export interface CredentialApi {
  * * `TrustPilot` - TrustPilot
  * * `Twitter` - Twitter
  * * `TyntecSMS` - TyntecSMS
+ * * `Bucketeer` - Bucketeer
  * * `Unleash` - Unleash
  * * `UpPromote` - UpPromote
  * * `Uptick` - Uptick
@@ -3780,6 +3781,7 @@ export const ExternalDataSourceTypeEnumApi = {
     TrustPilot: 'TrustPilot',
     Twitter: 'Twitter',
     TyntecSMS: 'TyntecSMS',
+    Bucketeer: 'Bucketeer',
     Unleash: 'Unleash',
     UpPromote: 'UpPromote',
     Uptick: 'Uptick',

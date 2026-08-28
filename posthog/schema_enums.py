@@ -1851,6 +1851,7 @@ class ExternalDataSourceType(StrEnum):
     TRUST_PILOT = "TrustPilot"
     TWITTER = "Twitter"
     TYNTEC_SMS = "TyntecSMS"
+    BUCKETEER = "Bucketeer"
     UNLEASH = "Unleash"
     UP_PROMOTE = "UpPromote"
     UPTICK = "Uptick"

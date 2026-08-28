@@ -195,6 +195,7 @@ from .brex.source import BrexSource
 from .browse_ai.source import BrowseAISource
 from .browser_use.source import BrowserUseSource
 from .browserbase.source import BrowserbaseSource
+from .bucketeer.source import BucketeerSource
 from .buffer.source import BufferSource
 from .bugherd.source import BugherdSource
 from .bugsnag.source import BugsnagSource

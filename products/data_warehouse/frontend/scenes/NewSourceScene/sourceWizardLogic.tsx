@@ -1857,6 +1857,7 @@ export interface sourceWizardLogicActions {
             | 'UkOns'
             | 'Umami'
             | 'UnComtrade'
+            | 'Bucketeer'
             | 'Unleash'
             | 'Unstructured'
             | 'Uploadcare'

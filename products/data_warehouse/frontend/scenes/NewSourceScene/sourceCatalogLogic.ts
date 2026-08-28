@@ -1382,6 +1382,7 @@ export interface sourceCatalogLogicMeta {
                       | 'UkOns'
                       | 'Umami'
                       | 'UnComtrade'
+                      | 'Bucketeer'
                       | 'Unleash'
                       | 'Unstructured'
                       | 'Uploadcare'
