@@ -173,8 +173,12 @@ COPY --from=nodejs-build --chown=posthog:posthog /code/common/replay-headless/pa
 COPY --from=nodejs-build --chown=posthog:posthog /code/nodejs/assets /code/nodejs/assets
 COPY --from=nodejs-build --chown=posthog:posthog /code/nodejs/bin /code/nodejs/bin
 
-# Same path as the main image uses, so both carry it in the same place.
-COPY --from=fetch-geoip-db --chown=posthog:posthog /code/share/GeoLite2-City.mmdb /code/share/GeoLite2-City.mmdb
+# /app/share, not /code/share: the deployment chart hardcodes
+# MMDB_FILE_LOCATION=/app/share/GeoLite2-City.mmdb and offers no value to
+# override it. Pointing the chart elsewhere from Helm values produces a second
+# env entry with the same name, which the API server rejects outright
+# ("duplicate entries for key"), so the file goes where it is already expected.
+COPY --from=fetch-geoip-db --chown=posthog:posthog /code/share/GeoLite2-City.mmdb /app/share/GeoLite2-City.mmdb
 
 
 # Setup ENV
