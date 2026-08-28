@@ -9,12 +9,14 @@ from parameterized import parameterized
 
 from products.warehouse_sources.backend.temporal.data_imports.sources.bucketeer.bucketeer import (
     PAGE_SIZE,
+    REQUEST_TIMEOUT_SECONDS,
     BucketeerHostNotAllowedError,
     BucketeerPaginationError,
     BucketeerResumeConfig,
     _headers,
     bucketeer_source,
     check_endpoint_permissions,
+    fetch_export_context,
     normalize_instance_url,
     validate_credentials,
 )
@@ -240,7 +242,7 @@ class TestEndpointPermissions:
                 _mock_response(200, {"features": []}),
                 _mock_response(403, {"message": "not authorized"}),
                 _mock_response(401, None),
-                _mock_response(429, None),
+                _mock_response(404, None),
                 _mock_response(500, None),
                 requests.exceptions.ConnectionError("boom"),
             ]
@@ -253,8 +255,9 @@ class TestEndpointPermissions:
         assert result["feature_flags"] is None
         assert result["segments"] == "not authorized"
         assert result["experiments"] == "Invalid Bucketeer API key"
-        # 429/5xx/network are not evidence a table is forbidden.
-        assert result["goals"] is None
+        # A 404 is not a permission problem: the deployment does not serve this endpoint.
+        assert result["goals"] == "This Bucketeer deployment does not expose this table"
+        # 5xx and network failures are not evidence a table is forbidden.
         assert result["audit_logs"] is None
         assert result["code_references"] is None
 
@@ -476,3 +479,88 @@ class TestHostSafetyAtRunTime:
         with patch(IS_HOST_SAFE_PATCH, return_value=(False, "Host not allowed")):
             with pytest.raises(BucketeerHostNotAllowedError):
                 _rows(_source(manager))
+
+
+class TestResumeCleanup:
+    def test_clears_the_checkpoint_once_the_walk_completes(self) -> None:
+        # Left behind, the final page's cursor would be picked up by a retry within the
+        # same job, which on a full-refresh table would replace it with that page alone.
+        manager = _make_manager()
+        with (
+            patch(IS_HOST_SAFE_PATCH, return_value=(True, None)),
+            patch(CONTEXT_PATCH, return_value=EXPORT_CONTEXT),
+            patch(CLIENT_SESSION_PATCH) as make_session,
+        ):
+            session = MagicMock()
+            make_session.return_value = session
+            _wire(
+                session,
+                [
+                    _json_response({"features": [{"id": "f1"}], "cursor": "1"}),
+                    _json_response({"features": [{"id": "f2"}], "cursor": ""}),
+                ],
+            )
+            _rows(_source(manager))
+
+        manager.clear_state.assert_called_once()
+
+    def test_does_not_clear_the_checkpoint_when_the_walk_fails(self) -> None:
+        # A failed walk must keep its checkpoint so the retry resumes rather than restarts.
+        manager = _make_manager()
+        with (
+            patch(IS_HOST_SAFE_PATCH, return_value=(True, None)),
+            patch(CONTEXT_PATCH, return_value=EXPORT_CONTEXT),
+            patch(CLIENT_SESSION_PATCH) as make_session,
+        ):
+            session = MagicMock()
+            make_session.return_value = session
+            _wire(
+                session,
+                [
+                    _json_response({"features": [{"id": "f1"}], "cursor": "same"}),
+                    _json_response({"features": [{"id": "f2"}], "cursor": "same"}),
+                ],
+            )
+            with pytest.raises(BucketeerPaginationError):
+                _rows(_source(manager))
+
+        manager.clear_state.assert_not_called()
+
+
+class TestRequestTimeout:
+    def test_every_sync_request_is_bounded(self) -> None:
+        # instance_url is customer-controlled: a gateway that accepts the connection and
+        # never responds would otherwise hold an import worker for the activity timeout.
+        manager = _make_manager()
+        with (
+            patch(IS_HOST_SAFE_PATCH, return_value=(True, None)),
+            patch(CONTEXT_PATCH, return_value=EXPORT_CONTEXT),
+            patch(CLIENT_SESSION_PATCH) as make_session,
+        ):
+            session = MagicMock()
+            make_session.return_value = session
+            _wire(session, [_json_response({"features": [], "cursor": ""})])
+            _rows(_source(manager))
+
+        assert session.send.call_args is not None
+        assert session.send.call_args.kwargs.get("timeout") == REQUEST_TIMEOUT_SECONDS
+
+
+class TestSyncTimeContextValidation:
+    @parameterized.expand(
+        [
+            ("missing_environment_id", "environmentId"),
+            ("missing_organization_id", "organizationId"),
+            ("missing_contract_version", "contractVersion"),
+        ]
+    )
+    def test_a_context_missing_a_required_field_fails_the_sync(self, _name: str, dropped: str) -> None:
+        # A null bucketeer_environment_id would be half the composite primary key, so two
+        # environments could collide instead of staying separate.
+        partial = {k: v for k, v in EXPORT_CONTEXT.items() if k != dropped}
+        with patch(
+            "products.warehouse_sources.backend.temporal.data_imports.sources.bucketeer.bucketeer._get_session"
+        ) as session:
+            session.return_value.get.return_value = _mock_response(200, partial)
+            with pytest.raises(ValueError, match="missing required fields"):
+                fetch_export_context(BASE_URL, API_KEY)
