@@ -592,6 +592,7 @@ class ExternalDataSourceType(models.TextChoices):
     TRUSTPILOT = "TrustPilot", "TrustPilot"
     TWITTER = "Twitter", "Twitter"
     TYNTECSMS = "TyntecSMS", "TyntecSMS"
+    BUCKETEER = "Bucketeer", "Bucketeer"
     UNLEASH = "Unleash", "Unleash"
     UPPROMOTE = "UpPromote", "UpPromote"
     UPTICK = "Uptick", "Uptick"

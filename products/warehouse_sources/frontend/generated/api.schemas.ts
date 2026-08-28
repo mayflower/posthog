@@ -954,6 +954,7 @@ export const ExternalDataSourceSerializersCreatedViaEnumApi = {
  * * `TrustPilot` - TrustPilot
  * * `Twitter` - Twitter
  * * `TyntecSMS` - TyntecSMS
+ * * `Bucketeer` - Bucketeer
  * * `Unleash` - Unleash
  * * `UpPromote` - UpPromote
  * * `Uptick` - Uptick
@@ -2282,6 +2283,7 @@ export const ExternalDataSourceTypeEnumApi = {
     TrustPilot: 'TrustPilot',
     Twitter: 'Twitter',
     TyntecSMS: 'TyntecSMS',
+    Bucketeer: 'Bucketeer',
     Unleash: 'Unleash',
     UpPromote: 'UpPromote',
     Uptick: 'Uptick',
@@ -3756,6 +3758,7 @@ export interface ExternalDataSourceCreateApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -5307,6 +5310,7 @@ export interface ExternalDataSourceConnectionOptionApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -6664,6 +6668,7 @@ export interface DatabaseSchemaRequestApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -7996,6 +8001,7 @@ export interface DirectConnectionSourceOptionApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -9413,6 +9419,7 @@ export interface SourcePreviewRequestApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -10780,6 +10787,7 @@ export interface SourceSetupApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -12154,6 +12162,7 @@ export interface SourceCredentialCreateApi {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick

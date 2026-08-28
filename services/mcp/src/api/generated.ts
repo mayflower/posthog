@@ -23192,6 +23192,7 @@ export namespace Schemas {
      * * `TrustPilot` - TrustPilot
      * * `Twitter` - Twitter
      * * `TyntecSMS` - TyntecSMS
+     * * `Bucketeer` - Bucketeer
      * * `Unleash` - Unleash
      * * `UpPromote` - UpPromote
      * * `Uptick` - Uptick
@@ -24520,6 +24521,7 @@ export namespace Schemas {
       TrustPilot: 'TrustPilot',
       Twitter: 'Twitter',
       TyntecSMS: 'TyntecSMS',
+      Bucketeer: 'Bucketeer',
       Unleash: 'Unleash',
       UpPromote: 'UpPromote',
       Uptick: 'Uptick',
@@ -25862,6 +25864,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -27899,6 +27902,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -36265,6 +36269,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -37627,6 +37632,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -77530,6 +77536,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -78900,6 +78907,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick
@@ -80260,6 +80268,7 @@ export namespace Schemas {
        * * `TrustPilot` - TrustPilot
        * * `Twitter` - Twitter
        * * `TyntecSMS` - TyntecSMS
+       * * `Bucketeer` - Bucketeer
        * * `Unleash` - Unleash
        * * `UpPromote` - UpPromote
        * * `Uptick` - Uptick

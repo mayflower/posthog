@@ -136,6 +136,7 @@ the row lists both.
 | brex                             | HTTP                        | requests                                                        | ✅                          |
 | browser_use                      | HTTP                        | requests                                                        | ✅                          |
 | browserbase                      | HTTP                        | requests                                                        | ✅                          |
+| bucketeer                        | HTTP                        | requests + `rest_source.RESTClient`                             | ✅                          |
 | bugherd                          | HTTP                        | requests + `rest_source.RESTClient`                             | ✅                          |
 | bugsnag                          | HTTP                        | requests                                                        | ✅                          |
 | buildbetter                      | HTTP                        | requests                                                        | ✅                          |
