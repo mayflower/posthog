@@ -100,6 +100,14 @@ def main() -> int:
 
         dest.write_text(source.read_text())
 
+    if drift and not args.check:
+        # A fixture missing upstream means it was renamed or removed. Writing a manifest
+        # that claims otherwise would hide exactly the drift this script exists to catch.
+        emit("Cannot update: the Bucketeer checkout is missing fixtures.", error=True)
+        for line in drift:
+            emit(f"  - {line}", error=True)
+        return 1
+
     if args.check:
         if drift:
             emit("Bucketeer contract fixtures are out of date:", error=True)

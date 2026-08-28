@@ -32,6 +32,11 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.common.typ
 # Bucketeer caps audit_logs at 200 per page and accepts the same parameter everywhere.
 PAGE_SIZE = 100
 
+# (connect, read) seconds for every sync request. The instance is customer-controlled and
+# self-hosted, so a gateway that accepts a connection and then never responds would hold an
+# import worker for the whole activity timeout.
+REQUEST_TIMEOUT_SECONDS = (10.0, 60.0)
+
 HOST_NOT_ALLOWED_ERROR = "Bucketeer instance URL is not allowed"
 
 
@@ -173,6 +178,12 @@ def fetch_export_context(base_url: str, api_key: str) -> dict[str, Any]:
     body = response.json()
     if not isinstance(body, dict):
         raise ValueError("Bucketeer export context response was not an object")
+    # Re-checked every run, not just at connect: a server upgraded in between could stop
+    # emitting a field, and a missing environment id would leave half the composite primary
+    # key null on every row.
+    missing = [key for key in CONTEXT_FIELD_BY_COLUMN.values() if not body.get(key)]
+    if missing:
+        raise ValueError(f"Bucketeer export context is missing required fields: {', '.join(sorted(missing))}")
     return body
 
 
@@ -215,6 +226,7 @@ def bucketeer_source(
             # off-host.
             "allowed_hosts": [],
             "allow_redirects": False,
+            "request_timeout": REQUEST_TIMEOUT_SECONDS,
         },
         "resource_defaults": {},
         "resources": [
@@ -258,6 +270,11 @@ def bucketeer_source(
             if not batch:
                 continue
             yield [{**row, **context} for row in batch]
+
+        # The walk finished, so drop the checkpoint. Left in place, a later attempt within
+        # the same job would resume at the final page's cursor and yield only those rows —
+        # and because every table is full refresh, that page would replace the whole table.
+        resumable_source_manager.clear_state()
 
     return SourceResponse(
         name=endpoint,
@@ -374,6 +391,10 @@ def check_endpoint_permissions(
             results[endpoint] = (
                 _error_message(response) or "Your Bucketeer API key does not have permission to read this table"
             )
+        elif response.status_code == 404:
+            # Not a permission problem: this deployment does not serve the endpoint at all.
+            # Reporting it here greys the table out instead of failing a sync later.
+            results[endpoint] = "This Bucketeer deployment does not expose this table"
         else:
             results[endpoint] = None
     return results
