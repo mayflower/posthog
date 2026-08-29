@@ -1,9 +1,6 @@
-"""The fixture sync script is the only thing keeping our copies honest.
-
-If it can report success while leaving a stale copy in place, the contract gate it feeds
-is worthless, so its refusal path is worth a test of its own.
-"""
-
+# The sync script is what keeps the checked-in contract fixtures honest. If it can report
+# success while leaving a stale copy in place, the gate it feeds is worthless, so its
+# refusal path is worth covering.
 import sys
 import json
 import subprocess

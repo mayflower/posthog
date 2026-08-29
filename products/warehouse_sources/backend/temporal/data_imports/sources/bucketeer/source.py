@@ -62,7 +62,9 @@ class BucketeerSource(ResumableSource[BucketeerSourceConfig, BucketeerResumeConf
 The instance URL is your Bucketeer gateway, the host you point SDKs at. The key is an [API key](https://docs.bucketeer.io/api-reference) with a public API read role; SDK keys will not work. This connector syncs configuration for the single environment the key is bound to, so connect one source per environment.
 """,
             iconPath="/static/services/bucketeer.svg",
-            docsUrl="https://posthog.com/docs/cdp/sources/bucketeer",
+            # No docsUrl until contents/docs/cdp/sources/bucketeer.md exists in the
+            # posthog.com repo: the website derives the slug from this value, so pointing
+            # it at an unwritten page ships a 404 and fails `audit_source_docs`.
             fields=cast(
                 list[FieldType],
                 [

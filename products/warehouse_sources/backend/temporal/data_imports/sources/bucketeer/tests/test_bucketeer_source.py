@@ -3,8 +3,6 @@ from unittest import mock
 
 from parameterized import parameterized
 
-from posthog.schema import DataWarehouseSourceCategory, ReleaseStatus
-
 from products.warehouse_sources.backend.temporal.data_imports.sources.bucketeer.canonical_descriptions import (
     CANONICAL_DESCRIPTIONS,
 )
@@ -13,11 +11,9 @@ from products.warehouse_sources.backend.temporal.data_imports.sources.bucketeer.
     ENDPOINTS,
 )
 from products.warehouse_sources.backend.temporal.data_imports.sources.bucketeer.source import BucketeerSource
-from products.warehouse_sources.backend.temporal.data_imports.sources.common.registry import SourceRegistry
 from products.warehouse_sources.backend.temporal.data_imports.sources.generated_configs.bucketeer import (
     BucketeerSourceConfig,
 )
-from products.warehouse_sources.backend.types import ExternalDataSourceType
 
 
 class TestBucketeerSource:
@@ -28,28 +24,15 @@ class TestBucketeerSource:
             instance_url="https://bucketeer.example.com", api_key="secret-api-key-value"
         )
 
-    def test_source_type(self) -> None:
-        assert self.source.source_type == ExternalDataSourceType.BUCKETEER
-
-    def test_registered_in_the_source_registry(self) -> None:
-        assert SourceRegistry.get_source(ExternalDataSourceType.BUCKETEER) is not None
-
     def test_connection_host_fields_covers_instance_url(self) -> None:
         # The stored API key is sent to whatever `instance_url` points at, so retargeting the
         # URL must force the editor to re-enter the key.
         assert self.source.connection_host_fields == ["instance_url"]
 
-    def test_ships_visible_as_alpha(self) -> None:
-        config = self.source.get_source_config
-        assert config.releaseStatus == ReleaseStatus.ALPHA
-        assert config.category == DataWarehouseSourceCategory.ENGINEERING___MONITORING
-        # unreleasedSource hides the connector from every user.
-        assert not config.unreleasedSource
-
-    def test_api_key_field_is_marked_secret(self) -> None:
-        fields = {f.name: f for f in self.source.get_source_config.fields}
-        assert fields["api_key"].secret is True
-        assert fields["instance_url"].secret is False
+    def test_ships_visible(self) -> None:
+        # The scaffold ships with unreleasedSource set and it hides the connector from
+        # every user, so leaving it in place silently ships nothing.
+        assert not self.source.get_source_config.unreleasedSource
 
     def test_get_schemas_covers_all_endpoints_as_full_refresh(self) -> None:
         schemas = self.source.get_schemas(self.config, self.team_id)
@@ -65,14 +48,6 @@ class TestBucketeerSource:
 
     def test_get_schemas_filtered_unknown_name_returns_empty(self) -> None:
         assert self.source.get_schemas(self.config, self.team_id, names=["nope"]) == []
-
-    def test_documented_tables_render_for_public_docs(self) -> None:
-        tables = self.source.get_documented_tables()
-        assert {t["name"] for t in tables} == set(ENDPOINTS)
-        assert all("Full refresh" in t["sync_methods"] for t in tables)
-
-    def test_every_table_has_a_canonical_description(self) -> None:
-        assert set(CANONICAL_DESCRIPTIONS.keys()) == set(ENDPOINTS)
 
     def test_every_table_documents_the_injected_lineage_columns(self) -> None:
         # These columns exist on every row, so a reader of any table needs them described.

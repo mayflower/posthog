@@ -144,6 +144,24 @@ def _validated_hostname(base_url: str) -> Optional[str]:
     return hostname
 
 
+def _resolved_base_url(instance_url: str, team_id: Optional[int]) -> tuple[Optional[str], Optional[str]]:
+    """The normalized base URL to talk to, or the reason it is not safe to.
+
+    The instance URL is fully customer-controlled, so a host that resolves to a private or
+    internal address is refused (SSRF). Host safety is only enforced on cloud, and only
+    when a team is known — see _is_host_safe.
+    """
+    base_url = normalize_instance_url(instance_url)
+    hostname = _validated_hostname(base_url)
+    if not hostname:
+        return None, "Invalid Bucketeer instance URL"
+    if team_id is not None:
+        host_ok, host_err = _is_host_safe(hostname, team_id)
+        if not host_ok:
+            return None, host_err or HOST_NOT_ALLOWED_ERROR
+    return base_url, None
+
+
 def _check_host(instance_url: str, team_id: int) -> None:
     hostname = _validated_hostname(normalize_instance_url(instance_url))
     if not hostname:
@@ -289,17 +307,9 @@ def validate_credentials(
     instance_url: str, api_key: str, schema_name: Optional[str] = None, team_id: Optional[int] = None
 ) -> tuple[bool, str | None]:
     """Confirm the key is genuine and the server speaks a contract version we understand."""
-    base_url = normalize_instance_url(instance_url)
-    hostname = _validated_hostname(base_url)
-    if not hostname:
-        return False, "Invalid Bucketeer instance URL"
-
-    # The instance URL is fully customer-controlled, so block hosts that resolve to private or
-    # internal addresses (SSRF). Only enforced on cloud — see _is_host_safe.
-    if team_id is not None:
-        host_ok, host_err = _is_host_safe(hostname, team_id)
-        if not host_ok:
-            return False, host_err or HOST_NOT_ALLOWED_ERROR
+    base_url, host_error = _resolved_base_url(instance_url, team_id)
+    if base_url is None:
+        return False, host_error
 
     session = _get_session(api_key)
     try:
@@ -365,13 +375,9 @@ def check_endpoint_permissions(
     (401/403). Throttles, 5xx and network blips are not permission problems, so they report as
     reachable rather than blocking the schema picker on a transient failure.
     """
-    base_url = normalize_instance_url(instance_url)
-    hostname = _validated_hostname(base_url)
-    if not hostname:
-        return dict.fromkeys(endpoints, "Invalid Bucketeer instance URL")
-    host_ok, host_err = _is_host_safe(hostname, team_id)
-    if not host_ok:
-        return dict.fromkeys(endpoints, host_err or HOST_NOT_ALLOWED_ERROR)
+    base_url, host_error = _resolved_base_url(instance_url, team_id)
+    if base_url is None:
+        return dict.fromkeys(endpoints, host_error)
 
     session = _get_session(api_key)
     results: dict[str, str | None] = {}
