@@ -1,6 +1,6 @@
 {
   "source": "bucketeer/test/fixtures/analytics_export_v1",
-  "bucketeer_commit": "e3df49aa753d42e0ff5913e98ee8c2602c9cc2c4",
+  "bucketeer_commit": "unknown",
   "files": [
     "context.json",
     "feature_flags_page_1.json",
