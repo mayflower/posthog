@@ -70,6 +70,11 @@ def manager(resume: BucketeerResumeConfig | None = None) -> MagicMock:
     return mock
 
 
+def rows_of(source_response: Any) -> list[dict[str, Any]]:
+    # SourceResponse.items is typed as sync-or-async; this source is always sync.
+    return [row for page in source_response.items() for row in page]
+
+
 def run_source(mgr: MagicMock, endpoint: str, responses: list[requests.Response]) -> tuple[list, list]:
     with (
         patch(IS_HOST_SAFE_PATCH, return_value=(True, None)),
@@ -87,7 +92,7 @@ def run_source(mgr: MagicMock, endpoint: str, responses: list[requests.Response]
             job_id="j",
             resumable_source_manager=mgr,
         )
-        rows = [row for page in source.items() for row in page]
+        rows = rows_of(source)
     return rows, params
 
 
