@@ -1,13 +1,9 @@
-"""Contract smoke test: the real source against Bucketeer's own canonical fixtures.
-
-The fixtures are byte-for-byte copies of Bucketeer's, kept in step by
-``sync_bucketeer_contract_fixtures.py``. Running the source against them means a change
-to a Bucketeer response shape fails here rather than in a production sync.
-
-This needs no sibling Bucketeer checkout: it reads the checked-in copies, so ordinary CI
-stays self-contained. Only the sync script's ``--check`` mode needs the sibling.
-"""
-
+# The fixtures are byte-for-byte copies of Bucketeer's, kept in step by
+# sync_bucketeer_contract_fixtures.py. Running the real source against them means a change
+# to a Bucketeer response shape fails here rather than in a production sync.
+#
+# No sibling Bucketeer checkout is needed: this reads the checked-in copies, so ordinary CI
+# stays self-contained. Only the sync script's --check mode needs the sibling.
 import json
 from pathlib import Path
 from typing import Any
