@@ -1,0 +1,507 @@
+{
+    "template_name": "Bucketeer rollout and experiment overview",
+    "dashboard_description": "Flag exposure and goal conversion from Bucketeer. These are Bucketeer's own evaluation and goal events, so the assignment was made by Bucketeer, not by PostHog. Connect the Bucketeer data warehouse source to join this against flag, experiment and goal configuration.",
+    "dashboard_filters": {},
+    "tags": [],
+    "tiles": [
+        {
+            "name": "Evaluations over time",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Every flag evaluation Bucketeer exported. Bucketeer performed the assignment; PostHog is recording it.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsLineGraph",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 0,
+                    "y": 0,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 0,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Unique exposed users",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "People who were evaluated against any flag, by day.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "dau",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsLineGraph",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 6,
+                    "y": 0,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 0,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Exposure by feature flag",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Which flags are actually being evaluated. Use it to spot flags that no longer serve traffic.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsBar",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_feature_id"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 0,
+                    "y": 5,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 5,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Exposure by variation",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Split of variations served. Filter to one feature and one version before reading this as a rollout split.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsBar",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_variation_id"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 6,
+                    "y": 5,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 5,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Evaluation reasons",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Why each evaluation resolved as it did. A rising ERROR_ reason means flags are falling back rather than targeting.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsBar",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_reason"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 0,
+                    "y": 10,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 10,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Goal conversions",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Goal events Bucketeer exported, split by goal.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_goal_reached",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_goal_reached",
+                            "event": "bucketeer_goal_reached"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsLineGraph",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_goal_id"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 6,
+                    "y": 10,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 10,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Total goal value",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Sum of the value carried on each goal event, split by goal.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_goal_reached",
+                            "kind": "EventsNode",
+                            "math": "sum",
+                            "name": "bucketeer_goal_reached",
+                            "event": "bucketeer_goal_reached",
+                            "math_property": "bucketeer_goal_value"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsLineGraph",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_goal_id"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 0,
+                    "y": 15,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 15,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "SDK and source mix",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "Which SDKs are reporting. A stale SDK version here explains flags that behave differently per platform.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "TrendsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        }
+                    ],
+                    "interval": "day",
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "trendsFilter": {
+                        "display": "ActionsBar",
+                        "showLegend": true,
+                        "aggregationAxisFormat": "numeric"
+                    },
+                    "filterTestAccounts": false,
+                    "breakdownFilter": {
+                        "breakdown_type": "event",
+                        "breakdown": "bucketeer_sdk_version"
+                    }
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 5,
+                    "w": 6,
+                    "x": 6,
+                    "y": 15,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 5,
+                    "w": 1,
+                    "x": 0,
+                    "y": 15,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        },
+        {
+            "name": "Exposure to conversion",
+            "type": "INSIGHT",
+            "color": null,
+            "description": "People evaluated against a flag who then reached a goal. Bucketeer assigned the variation; break this down by bucketeer_variation_id to compare variations.",
+            "query": {
+                "kind": "InsightVizNode",
+                "source": {
+                    "kind": "FunnelsQuery",
+                    "series": [
+                        {
+                            "id": "bucketeer_feature_evaluated",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_feature_evaluated",
+                            "event": "bucketeer_feature_evaluated"
+                        },
+                        {
+                            "id": "bucketeer_goal_reached",
+                            "kind": "EventsNode",
+                            "math": "total",
+                            "name": "bucketeer_goal_reached",
+                            "event": "bucketeer_goal_reached"
+                        }
+                    ],
+                    "dateRange": {
+                        "date_from": "-14d",
+                        "explicitDate": false
+                    },
+                    "properties": [],
+                    "funnelsFilter": {
+                        "funnelVizType": "steps",
+                        "funnelOrderType": "ordered"
+                    },
+                    "filterTestAccounts": false
+                }
+            },
+            "layouts": {
+                "sm": {
+                    "h": 6,
+                    "w": 12,
+                    "x": 0,
+                    "y": 20,
+                    "minH": 5,
+                    "minW": 3
+                },
+                "xs": {
+                    "h": 6,
+                    "w": 1,
+                    "x": 0,
+                    "y": 20,
+                    "minH": 5,
+                    "minW": 3
+                }
+            }
+        }
+    ],
+    "variables": [],
+    "image_url": null,
+    "scope": "global",
+    "availability_contexts": null
+}
