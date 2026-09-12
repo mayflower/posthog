@@ -1,7 +1,7 @@
 # FOSS build
 
 This directory makes the Docker image built from this fork a pure MIT build of PostHog.
-Upstream's `ee/` tree is licensed under the PostHog Enterprise License and must not ship in that image.
+Upstream's `ee/` tree carries a proprietary license and must not ship in that image.
 
 ## What is in here
 
@@ -49,3 +49,19 @@ cd /tmp/foss-tree && DEBUG=1 OPT_OUT_CAPTURE=1 python foss/check_ee_shim.py
 A failure lists the new symbols core imports.
 Add them to the shim with the same discipline: implement generic helpers, make quota and billing safe no-ops, and let enterprise features raise.
 If core adds a migration that depends on a new `ee` node, add a no-op migration with that name to `ee/migrations/`.
+
+## Using the image with mayflower/posthog-helm
+
+The chart's `images.app` entry takes the FOSS image directly. Every workload and job that runs the app image (web, Celery worker, the Temporal workers, migrate, async migrations check) uses the same entrypoints as upstream, and the image keeps upstream's uid 10001.
+
+```yaml
+images:
+  app:
+    repository: ghcr.io/mayflower/posthog-foss
+    tag: <commit sha> # every verified build pushes its commit tag; master also moves the master tag
+  node:
+    repository: ghcr.io/mayflower/posthog-node
+    tag: master
+```
+
+The Temporal workers for Max AI and LLM evals are disabled in the chart by default; leave them off, the FOSS build has no agent to run.

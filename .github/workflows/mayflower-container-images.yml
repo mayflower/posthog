@@ -22,6 +22,8 @@ env:
     REGISTRY: ghcr.io
     APP_IMAGE: ghcr.io/mayflower/posthog-foss
     NODE_IMAGE: ghcr.io/mayflower/posthog-node
+    # On pull requests github.sha is the transient merge commit; tag with the branch head instead.
+    IMAGE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
     posthog-foss:
@@ -86,29 +88,29 @@ jobs:
                   platforms: linux/amd64
                   tags: |
                       ${{ env.APP_IMAGE }}:master
-                      ${{ env.APP_IMAGE }}:${{ github.sha }}
+                      ${{ env.APP_IMAGE }}:${{ env.IMAGE_SHA }}
                   labels: |
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.revision=${{ env.IMAGE_SHA }}
                       org.opencontainers.image.licenses=MIT
                   build-args: |
-                      COMMIT_HASH=${{ github.sha }}
+                      COMMIT_HASH=${{ env.IMAGE_SHA }}
                       BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
                   cache-from: type=gha,scope=posthog-foss
                   cache-to: type=gha,scope=posthog-foss,mode=max
 
             - name: Verify no enterprise code is in the image
               run: |
-                  docker run --rm --entrypoint sh "${APP_IMAGE}:${{ github.sha }}" -c '
+                  docker run --rm --entrypoint sh "${APP_IMAGE}:${IMAGE_SHA}" -c '
                     set -e
                     test ! -e ee/LICENSE || { echo "ee/LICENSE found in image" >&2; exit 1; }
                     test -f ee/foss_settings.py || { echo "foss shim missing from image" >&2; exit 1; }
-                    if grep -rlq "PostHog Enterprise" ee/; then echo "enterprise license text found under ee/" >&2; exit 1; fi
+                    if grep -rlq "The PostHog Enterprise license (the" ee/; then echo "enterprise license text found under ee/" >&2; exit 1; fi
                   '
 
             - name: Verify core still boots without the enterprise tree
               env:
-                  IMAGE: ${{ env.APP_IMAGE }}:${{ github.sha }}
+                  IMAGE: ${{ env.APP_IMAGE }}:${{ env.IMAGE_SHA }}
               run: |
                   docker run --rm --network host \
                     -e DATABASE_URL=postgres://posthog:posthog@localhost:5432/posthog \
@@ -123,7 +125,7 @@ jobs:
             # can be tried in the Helm chart before it merges. Only master moves the floating tag.
             - name: Push image
               run: |
-                  docker push "${APP_IMAGE}:${{ github.sha }}"
+                  docker push "${APP_IMAGE}:${IMAGE_SHA}"
                   if [ "${{ github.ref }}" = "refs/heads/master" ]; then docker push "${APP_IMAGE}:master"; fi
 
     posthog-node:

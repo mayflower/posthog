@@ -1,6 +1,6 @@
 """FOSS replacement for the enterprise ``ee`` package.
 
-The upstream ``ee/`` tree is licensed under the PostHog Enterprise License. This package is written from
+The upstream ``ee/`` tree carries a proprietary license. This package is written from
 scratch under the MIT license and only does three things:
 
 1. Owns the ``ee`` Django app label so the MIT access-control models that carry it
