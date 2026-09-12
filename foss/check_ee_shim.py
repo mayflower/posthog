@@ -18,7 +18,7 @@ import importlib
 from collections import defaultdict
 
 ROOTS = ("posthog", "products", "common")
-SKIP = ("/test", "/tests/", "conftest.py", "/eval/", "/evals/", "/benchmarks/", "/dags/")
+SKIP = ("/test", "/tests/", "conftest.py", "/eval/", "/evals/", "/eval_harness/", "/benchmarks/", "/dags/")
 
 
 def guard_of(ancestors: list[ast.AST]) -> str:
@@ -73,6 +73,9 @@ def collect() -> dict[str, list[tuple[str, str, str, int]]]:
 INTENTIONALLY_ABSENT = {
     # The management command is Cloud-only; the Temporal workflow that shares this import catches ImportError.
     ("ee.billing.quota_limiting", "update_all_orgs_billing_quotas"),
+    # ClickHouse migrations import these inside try/except ImportError and skip materialization without them.
+    ("ee.clickhouse.materialized_columns.columns", "materialize"),
+    ("ee.clickhouse.materialized_columns.columns", "backfill_materialized_columns"),
 }
 
 

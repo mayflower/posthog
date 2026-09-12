@@ -36,6 +36,6 @@ def check_index_exists(*args: Any, **kwargs: Any) -> bool:
     return False
 
 
-materialize = unavailable_function("materialize", "Materialized columns")
-backfill_materialized_columns = unavailable_function("backfill_materialized_columns", "Materialized columns")
+# ``materialize`` and ``backfill_materialized_columns`` are deliberately absent: the ClickHouse migrations
+# that call them do so inside ``try/except ImportError`` and skip the step in the FOSS build.
 drop_column = unavailable_function("drop_column", "Materialized columns")
