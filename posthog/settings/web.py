@@ -220,7 +220,8 @@ if DEBUG:
 try:
     from ee.apps import EnterpriseConfig  # noqa: F401
 except ImportError:
-    pass
+    # FOSS build (see foss/README.md): the "ee" label still owns the MIT access-control models.
+    INSTALLED_APPS.append("ee.apps.FossConfig")
 else:
     INSTALLED_APPS.append("ee.apps.EnterpriseConfig")
 

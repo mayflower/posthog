@@ -225,7 +225,8 @@ COPY common/hogvm common/hogvm/
 COPY common/migration_utils common/migration_utils/
 COPY posthog posthog/
 COPY products/ products/
-COPY ee ee/
+# FOSS build: the MIT shim in foss/ee replaces the enterprise tree (see foss/README.md).
+COPY foss/ee ee/
 
 # Copy the sourcemap-processed frontend assets and also the products.json file. The CLI injects
 # chunk IDs into JS before uploading maps, so the runtime JS must come from the same processed tree.
@@ -398,7 +399,8 @@ COPY --chown=posthog:posthog ./bin ./bin/
 COPY --chown=posthog:posthog ./rust/persons_migrations ./rust/persons_migrations/
 COPY --chown=posthog:posthog manage.py manage.py
 COPY --chown=posthog:posthog posthog posthog/
-COPY --chown=posthog:posthog ee ee/
+COPY --chown=posthog:posthog foss/ee ee/
+COPY --chown=posthog:posthog foss/check_ee_shim.py foss/smoke.py foss/
 COPY --chown=posthog:posthog common/hogvm common/hogvm/
 COPY --chown=posthog:posthog common/migration_utils common/migration_utils/
 COPY --chown=posthog:posthog products products/

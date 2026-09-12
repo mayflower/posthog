@@ -1,0 +1,25 @@
+from posthog.schema import PropertyOperator
+
+PROPERTY_FILTER_VERBOSE_NAME: dict[PropertyOperator, str] = {
+    PropertyOperator.EXACT: "equals",
+    PropertyOperator.IS_NOT: "does not equal",
+    PropertyOperator.ICONTAINS: "contains",
+    PropertyOperator.NOT_ICONTAINS: "does not contain",
+    PropertyOperator.REGEX: "matches regex",
+    PropertyOperator.NOT_REGEX: "does not match regex",
+    PropertyOperator.GT: "greater than",
+    PropertyOperator.GTE: "greater than or equal to",
+    PropertyOperator.LT: "less than",
+    PropertyOperator.LTE: "less than or equal to",
+    PropertyOperator.IS_SET: "is set",
+    PropertyOperator.IS_NOT_SET: "is not set",
+    PropertyOperator.IS_DATE_EXACT: "is on exact date",
+    PropertyOperator.IS_DATE_BEFORE: "is before date",
+    PropertyOperator.IS_DATE_AFTER: "is after date",
+    PropertyOperator.BETWEEN: "is between",
+    PropertyOperator.NOT_BETWEEN: "is not between",
+    PropertyOperator.MIN: "minimum",
+    PropertyOperator.MAX: "maximum",
+    PropertyOperator.IN_: "is one of",
+    PropertyOperator.NOT_IN: "is not one of",
+}
