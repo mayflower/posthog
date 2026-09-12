@@ -13,6 +13,10 @@ lazy symbols are reported so a reviewer can decide whether the code path is reac
 
 import ast
 import sys
+from pathlib import Path
+
+# Runnable as `python foss/<script>.py` from the image: put the repository root on the path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pathlib
 import importlib
 from collections import defaultdict

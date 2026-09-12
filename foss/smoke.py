@@ -11,6 +11,10 @@ Runs inside the built image (``python foss/smoke.py``) with ``DATABASE_URL`` and
 
 import os
 import sys
+from pathlib import Path
+
+# Runnable as `python foss/<script>.py` from the image: put the repository root on the path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import importlib
 import subprocess
 
