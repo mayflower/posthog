@@ -17,6 +17,7 @@
 !dags
 !docs/onboarding
 !ee
+!foss
 !frontend/@posthog
 !frontend/*.*
 !frontend/.storybook

@@ -1,0 +1,2 @@
+LLM_TRACES_SUMMARIES_PRODUCT = "llm_analytics"
+LLM_TRACES_SUMMARIES_DOCUMENT_TYPE = "llm_trace_summary"

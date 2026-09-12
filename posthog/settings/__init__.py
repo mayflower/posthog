@@ -154,3 +154,5 @@ QUERY_COALESCING_MAX_WAIT_SECONDS: int = get_from_env("QUERY_COALESCING_MAX_WAIT
 # Extend and override these settings with EE's ones
 if "ee.apps.EnterpriseConfig" in INSTALLED_APPS:
     from ee.settings import *  # noqa: F401, F403
+elif "ee.apps.FossConfig" in INSTALLED_APPS:
+    from ee.foss_settings import *  # noqa: F401, F403

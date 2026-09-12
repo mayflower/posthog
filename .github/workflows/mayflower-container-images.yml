@@ -4,6 +4,14 @@ on:
     push:
         branches:
             - master
+    pull_request:
+        paths:
+            - Dockerfile
+            - Dockerfile.node
+            - .dockerignore
+            - foss/**
+            - posthog/settings/**
+            - .github/workflows/mayflower-container-images.yml
     workflow_dispatch:
 
 concurrency:
@@ -12,24 +20,54 @@ concurrency:
 
 env:
     REGISTRY: ghcr.io
-    APP_IMAGE: ghcr.io/mayflower/posthog
+    APP_IMAGE: ghcr.io/mayflower/posthog-foss
     NODE_IMAGE: ghcr.io/mayflower/posthog-node
+    # On pull requests github.sha is the transient merge commit; tag with the branch head instead.
+    IMAGE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-    posthog:
-        name: Build and push PostHog image
-        if: github.repository == 'mayflower/posthog' && github.ref == 'refs/heads/master'
+    posthog-foss:
+        # Builds the MIT-only app image: foss/ee replaces the enterprise tree (see foss/README.md).
+        # The image is verified before it is pushed, so a rebase that leaks a new enterprise import
+        # fails here instead of at deploy time.
+        name: Build, verify and push PostHog FOSS image
+        if: github.repository == 'mayflower/posthog'
         runs-on: ubuntu-24.04
-        timeout-minutes: 90
+        timeout-minutes: 120
         permissions:
             contents: read
             packages: write
+        services:
+            postgres:
+                image: postgres:16-alpine
+                env:
+                    POSTGRES_USER: posthog
+                    POSTGRES_PASSWORD: posthog
+                    POSTGRES_DB: posthog
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+            redis:
+                image: redis:7-alpine
+                ports:
+                    - 6379:6379
 
         steps:
             - name: Check out
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
                   fetch-depth: 2
+
+            - name: Refuse to build if the enterprise tree would reach the image
+              run: |
+                  if grep -nE '^COPY( --[a-z=:]+)* ee ee/' Dockerfile; then
+                    echo "Dockerfile copies upstream ee/ into the image; the FOSS build must copy foss/ee instead" >&2
+                    exit 1
+                  fi
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
@@ -41,23 +79,54 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Build and push image
+            - name: Build image
               uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
               with:
                   context: .
-                  push: true
+                  load: true
+                  push: false
                   platforms: linux/amd64
                   tags: |
                       ${{ env.APP_IMAGE }}:master
-                      ${{ env.APP_IMAGE }}:${{ github.sha }}
+                      ${{ env.APP_IMAGE }}:${{ env.IMAGE_SHA }}
                   labels: |
                       org.opencontainers.image.source=https://github.com/${{ github.repository }}
-                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.revision=${{ env.IMAGE_SHA }}
+                      org.opencontainers.image.licenses=MIT
                   build-args: |
-                      COMMIT_HASH=${{ github.sha }}
+                      COMMIT_HASH=${{ env.IMAGE_SHA }}
                       BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
-                  cache-from: type=gha,scope=posthog
-                  cache-to: type=gha,scope=posthog,mode=max
+                  cache-from: type=gha,scope=posthog-foss
+                  cache-to: type=gha,scope=posthog-foss,mode=max
+
+            - name: Verify no enterprise code is in the image
+              run: |
+                  docker run --rm --entrypoint sh "${APP_IMAGE}:${IMAGE_SHA}" -c '
+                    set -e
+                    test ! -e ee/LICENSE || { echo "ee/LICENSE found in image" >&2; exit 1; }
+                    test -f ee/foss_settings.py || { echo "foss shim missing from image" >&2; exit 1; }
+                    if grep -rlq "The PostHog Enterprise license (the" ee/; then echo "enterprise license text found under ee/" >&2; exit 1; fi
+                  '
+
+            - name: Verify core still boots without the enterprise tree
+              env:
+                  IMAGE: ${{ env.APP_IMAGE }}:${{ env.IMAGE_SHA }}
+              run: |
+                  docker run --rm --network host \
+                    -e DATABASE_URL=postgres://posthog:posthog@localhost:5432/posthog \
+                    -e REDIS_URL=redis://localhost:6379/ \
+                    -e SITE_URL=http://localhost:8000 \
+                    -e SECRET_KEY=ci-smoke-only \
+                    -e OPT_OUT_CAPTURE=1 \
+                    -e SKIP_SERVICE_VERSION_REQUIREMENTS=1 \
+                    "$IMAGE" sh -c 'python foss/check_ee_shim.py && python foss/smoke.py'
+
+            # The commit tag is immutable and safe to publish from any verified build, so a PR's image
+            # can be tried in the Helm chart before it merges. Only master moves the floating tag.
+            - name: Push image
+              run: |
+                  docker push "${APP_IMAGE}:${IMAGE_SHA}"
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]; then docker push "${APP_IMAGE}:master"; fi
 
     posthog-node:
         name: Build and push PostHog node image
